@@ -10,14 +10,17 @@ int main() {
     auto initial_nums = get_initial_nums();
     std::unordered_map<int, int> last_time_spoken;
     last_time_spoken.reserve(30000000);
+    std::vector<bool> seen(30000000, false);
 
     for (size_t i = 0; i < initial_nums.size() - 1; i++) {
+        seen.at(initial_nums.at(i)) = true;
         last_time_spoken[initial_nums.at(i)] = i;
     }
 
     int last_spoken_num = initial_nums.at(initial_nums.size() - 1);
     for (int current_turn = initial_nums.size(); current_turn < 30000000; current_turn++) {
-        if (last_time_spoken.find(last_spoken_num) == last_time_spoken.end()) {
+        if (!seen.at(last_spoken_num)) {
+            seen.at(last_spoken_num) = true;
             last_time_spoken[last_spoken_num] = current_turn - 1;
             last_spoken_num = 0;
         } else {
