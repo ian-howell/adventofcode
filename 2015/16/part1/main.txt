@@ -1,0 +1,5 @@
+This was manually solved with grep.
+Something like
+grep "children: 3" input.txt then scan the list to see if any were valid matches
+Then grep using cats, then samoyeds, etc
+Eventually it becomes really obvious that there's only 1 aunt which actually satisifies the constraint
