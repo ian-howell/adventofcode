@@ -1,4 +1,1 @@
 *.out
-
-# go modules - `go build` insists that I create one
-go.mod
