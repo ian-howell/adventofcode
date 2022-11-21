@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [[ $# != 1 ]]; then
+  printf "Usage: %s <year>\n" "$0"
+  exit 1
+fi
+
+declare year="$1"
+for i in {01..25}; do
+    mkdir -p  "$year/$i/part1"
+    mkdir -p  "$year/$i/part2"
+done
