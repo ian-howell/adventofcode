@@ -9,26 +9,41 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 func main() {
-	total := 0
+	results := make(chan int)
+	wg := sync.WaitGroup{}
 	s := bufio.NewScanner(os.Stdin)
 	for s.Scan() {
 		if strings.HasPrefix(s.Text(), "#") {
 			continue
 		}
-		total += process(s.Text())
+		wg.Add(1)
+		go func(str string) {
+			process(str, results)
+			wg.Done()
+		}(s.Text())
+	}
+
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	total := 0
+	for result := range results {
+		total += result
 	}
 	fmt.Println(total)
 }
 
-func process(s string) int {
+func process(s string, results chan<- int) {
 	target, inputs := parse(s)
 	if valid(target, inputs) {
-		return target
+		results <- target
 	}
-	return 0
 }
 
 func valid(target int, inputs []int) bool {
