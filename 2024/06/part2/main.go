@@ -12,18 +12,23 @@ func main() {
 
 	total := 0
 	for pathCell := range pathCells {
-		modifiedGrid := addObstacle(grid, pathCell)
-		if hasCycle(modifiedGrid) {
-			total++
-		}
+		func() {
+			addObstacle(grid, pathCell)
+			defer removeObstacle(grid, pathCell)
+			if hasCycle(grid) {
+				total++
+			}
+		}()
 	}
 	fmt.Println(total)
 }
 
-func addObstacle(grid [][]byte, cell Cell) [][]byte {
-	newGrid := copyGrid(grid)
-	newGrid[cell.Row][cell.Col] = '#'
-	return newGrid
+func removeObstacle(grid [][]byte, cell Cell) {
+	grid[cell.Row][cell.Col] = '#'
+}
+
+func addObstacle(grid [][]byte, cell Cell) {
+	grid[cell.Row][cell.Col] = '#'
 }
 
 func hasCycle(grid [][]byte) bool {
@@ -39,15 +44,6 @@ func hasCycle(grid [][]byte) bool {
 		guard.Step(grid)
 	}
 	return false
-}
-
-func copyGrid(grid [][]byte) [][]byte {
-	newGrid := make([][]byte, len(grid))
-	for i, row := range grid {
-		newGrid[i] = make([]byte, len(row))
-		copy(newGrid[i], row)
-	}
-	return newGrid
 }
 
 func getPathCells(grid [][]byte) map[Cell]struct{} {
