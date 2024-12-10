@@ -3,93 +3,61 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
-	"math"
 	"os"
-	"slices"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 func main() {
-	results := make(chan int)
-	wg := sync.WaitGroup{}
+	total := 0
 	s := bufio.NewScanner(os.Stdin)
 	for s.Scan() {
 		if strings.HasPrefix(s.Text(), "#") {
 			continue
 		}
-		wg.Add(1)
-		go func(str string) {
-			process(str, results)
-			wg.Done()
-		}(s.Text())
-	}
-
-	go func() {
-		wg.Wait()
-		close(results)
-	}()
-
-	total := 0
-	for result := range results {
-		total += result
+		total += process(s.Text())
 	}
 	fmt.Println(total)
 }
 
-func process(s string, results chan<- int) {
+func process(s string) int {
 	target, inputs := parse(s)
 	if valid(target, inputs) {
-		results <- target
+		return target
 	}
+	return 0
 }
 
 func valid(target int, inputs []int) bool {
-	solutions := generateSolutions(inputs)
-	_, ok := solutions[target]
-	return ok
-}
-
-func generateSolutions(inputs []int) map[int]struct{} {
 	if len(inputs) == 0 {
-		return nil
+		return false
 	}
 
-	if len(inputs) == 1 {
-		return map[int]struct{}{inputs[0]: {}}
+	if len(inputs) == 1 && inputs[0] == target {
+		return true
 	}
 
-	solutions := map[int]struct{}{}
-	inputsCopy := slices.Clone(inputs[1:])
+	l := len(inputs) - 1
+	if target%inputs[l] == 0 && valid(target/inputs[l], inputs[:l]) {
+		return true
+	}
 
-	inputsCopy[0] = inputs[0] * inputs[1]
-	solutions = Union(solutions, generateSolutions(inputsCopy))
+	if valid(target-inputs[l], inputs[:l]) {
+		return true
+	}
 
-	inputsCopy[0] = inputs[0] + inputs[1]
-	solutions = Union(solutions, generateSolutions(inputsCopy))
+	trimmed := trimSuffix(target, inputs[l])
+	if trimmed != target && valid(trimmed, inputs[:l]) {
+		return true
+	}
 
-	inputsCopy[0] = Concatenate(inputs[0], inputs[1])
-	solutions = Union(solutions, generateSolutions(inputsCopy))
-
-	return solutions
+	return false
 }
 
-func Union(a, b map[int]struct{}) map[int]struct{} {
-	result := map[int]struct{}{}
-	for val := range a {
-		result[val] = struct{}{}
-	}
-	for val := range b {
-		result[val] = struct{}{}
-	}
-	return result
-}
-
-func Concatenate(a, b int) int {
-	numDigitsInB := log10(b)
-	return a*pow10(numDigitsInB+1) + b
+func trimSuffix(num, suffix int) int {
+	numStr := strconv.Itoa(num)
+	suffixStr := strconv.Itoa(suffix)
+	return atoi(strings.TrimSuffix(numStr, suffixStr))
 }
 
 func parse(s string) (int, []int) {
@@ -99,10 +67,7 @@ func parse(s string) (int, []int) {
 }
 
 func atoi(a string) int {
-	i, err := strconv.Atoi(a)
-	if err != nil {
-		log.Fatalf("failed to convert '%s' to int: %v", a, err)
-	}
+	i, _ := strconv.Atoi(a) // errors do not occur in my AOC inputs
 	return i
 }
 
@@ -112,12 +77,4 @@ func toInts(strs []string) []int {
 		ints = append(ints, atoi(s))
 	}
 	return ints
-}
-
-func log10(x int) int {
-	return int(math.Log10(float64(x)))
-}
-
-func pow10(x int) int {
-	return int(math.Pow10(x))
 }
