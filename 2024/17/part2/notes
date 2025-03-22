@@ -1,0 +1,9 @@
+1. B = A & 0x3
+2. B = B xor 5
+3. C = A / 2^B
+4. B = B xor 6
+5. B = B xor C
+6. Output B & 0x3
+7. A = A / 2^3            (A = A / 8)     (A = A >> 3)
+8. If A == 0: stop
+9. Go to 1
