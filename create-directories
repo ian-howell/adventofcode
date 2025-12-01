@@ -6,7 +6,7 @@ if [[ $# != 1 ]]; then
 fi
 
 declare year="$1"
-for i in {01..25}; do
+for i in {01..12}; do
     mkdir -p  "$year/$i/part1"
     mkdir -p  "$year/$i/part2"
 done
